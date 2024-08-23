@@ -1,6 +1,7 @@
 #include "ui/QtWidgetsApplication1.h"
 #include <QtWidgets/QApplication>
 #include "cvfem/Mesh_cvfem.h"
+#include "fvm/FVM.h"
 //int main(int argc, char *argv[])
 //{
 //    QApplication a(argc, argv);
@@ -10,7 +11,7 @@
 //}
 
 int main(int argc, char* argv[]) {
-	Mesh_cvfem test;
+	//Mesh_cvfem test;
 	/*vector<double>b;
 	b.resize(3);
 	b[0] = 20;
@@ -33,6 +34,7 @@ int main(int argc, char* argv[]) {
 	auto x = test.solver_equtionGaussSeidel(A, b);
 	auto y = test.solver_equtionJacobi(A, b);
 	auto z = test.solver_equtionSOR(A, b, 0.7);*/
-	test.cal("C:\\Users\\yunxiang.xing\\Desktop\\LBM\\QtWidgetsApplication1\\x64\\test\\test.rmsh");
+	FVM::Fvm test;
+	test.cal_Diff("C:\\Users\\yunxiang.xing\\Desktop\\LBM\\QtWidgetsApplication1\\x64\\test\\test.rmsh");
 	return 0;
 }

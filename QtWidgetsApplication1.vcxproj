@@ -100,7 +100,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="base\base.cpp" />
-    <ClCompile Include="FVM.cpp" />
+    <ClCompile Include="fvm\FVM.cpp" />
     <ClCompile Include="LBM\LBM1.cpp" />
     <ClCompile Include="LBM\LBM_Thread.cpp" />
     <ClCompile Include="base\mesh.cpp" />
@@ -117,7 +117,7 @@
   <ItemGroup>
     <QtMoc Include="LBM\LBM_Thread.h" />
     <ClInclude Include="base\base.h" />
-    <ClInclude Include="cvfem\FVM.h" />
+    <ClInclude Include="fvm\FVM.h" />
     <ClInclude Include="base\mesh.h" />
     <QtMoc Include="ui\SphereDialog.h" />
     <ClInclude Include="cvfem\Mesh_cvfem.h" />

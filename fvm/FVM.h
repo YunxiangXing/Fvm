@@ -6,6 +6,10 @@
 //1.over-relaxed: Ef = Sf * Sf / (ecf * Sf) * ecf
 //
 namespace FVM {
+	enum bir {
+		inlet = 1,
+		outlet = 3
+	};
 	struct gradvalue {
 		Point C, f1, f2, f3, f4;
 		int idf1 = -1, idf2 = -1, idf3 = -1, idf4 = -1;
@@ -17,13 +21,12 @@ namespace FVM {
 	class Fvm :public Mesh_cvfem {
 	public:
 		void findsharedface();
-		void fvm_diff();
-		void cal();
+		void init(string cwd);
+		void cal_Diff(string cwd);
 		void cal_gradient();
-		void boundary();
 		//压力速度耦合算法
 		void simple();
-		inline int faceid(int, int, int);
+		inline uint64_t faceid(uint64_t, uint64_t, uint64_t);
 		//virtual void write() override;
 		//
 	private:
@@ -34,9 +37,10 @@ namespace FVM {
 		//vector<vector<int>>mesh_neihaxi;//快速检索邻居节点哈希表
 		//vector<vector<int>>mesh_bj;//边界三角形网格
 		//vector<Point>mesh_gradient;//单元的梯度
-		map<int, vector<int>>sharedface;
+		map<uint64_t, vector<int>>sharedface;
 		vector<vector<gradcon>>Gradelements;
 		vector<gradvalue>grad;
+		map<uint64_t, int>fvm_bj;
 	};
 }
 #endif

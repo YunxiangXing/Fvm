@@ -1,10 +1,12 @@
-#include"cvfem/FVM.h"
+#include"fvm/FVM.h"
 using namespace FVM;
 void Fvm::pgrad(Point& g, int id, int i, Point& df, Point& Sf,double y) {
-	gradcon temp;
-	temp.data = 1.0 / mesh_eles[i].getvol() * (0.5 * df * g + y) * Sf;
-	temp.id = id;
-	Gradelements[i].push_back(temp);
+	if (id != -1) {
+		gradcon temp;
+		temp.data = 1.0 / mesh_eles[i].getvol() * (0.5 * df * g + y) * Sf;
+		temp.id = id;
+		Gradelements[i].push_back(temp);
+	}
 }
 void Fvm::cal_gradient() {
 	//1.计算全局的未知梯度系数
@@ -16,7 +18,7 @@ void Fvm::cal_gradient() {
 	for (int i = 0; i < grad.size(); i++) {
 		vector<Point>Sf = mesh_eles[i].getelementsurfacenormal();
 		double Vc = mesh_eles[i].getvol();
-		int id[4];
+		uint64_t id[4];
 		id[0] = faceid(mesh_eles[i].numA, mesh_eles[i].numB, mesh_eles[i].numC);
 		id[1] = faceid(mesh_eles[i].numA, mesh_eles[i].numB, mesh_eles[i].numD);
 		id[2] = faceid(mesh_eles[i].numA, mesh_eles[i].numC, mesh_eles[i].numD);
@@ -73,7 +75,6 @@ void Fvm::cal_gradient() {
 		df[1] = rf[1] - 0.5 * (rC + rF[1]);
 		df[2] = rf[2] - 0.5 * (rC + rF[2]);
 		df[3] = rf[3] - 0.5 * (rC + rF[3]);
-
 		//gradC
 		for (int j = 0; j < 4; j++) {
 			pgrad(grad[i].C, i, i, df[j], Sf[j], 0.5);
@@ -82,36 +83,49 @@ void Fvm::cal_gradient() {
 			pgrad(grad[i].f3, grad[i].idf3, i, df[j], Sf[j], 0.0);
 			pgrad(grad[i].f4, grad[i].idf4, i, df[j], Sf[j], 0.0);
 		}
-		//gradF-f1
-		pgrad(grad[grad[i].idf1].C, grad[i].idf1, i, df[0], Sf[0], 0.5);
-		pgrad(grad[grad[i].idf1].f1, grad[grad[i].idf1].idf1, i, df[0], Sf[0], 0.0);
-		pgrad(grad[grad[i].idf1].f2, grad[grad[i].idf1].idf2, i, df[0], Sf[0], 0.0);
-		pgrad(grad[grad[i].idf1].f3, grad[grad[i].idf1].idf3, i, df[0], Sf[0], 0.0);
-		pgrad(grad[grad[i].idf1].f4, grad[grad[i].idf1].idf4, i, df[0], Sf[0], 0.0);
-		//gradF-f2
-		pgrad(grad[grad[i].idf2].C, grad[i].idf2, i, df[0], Sf[0], 0.5);
-		pgrad(grad[grad[i].idf2].f1, grad[grad[i].idf2].idf1, i, df[0], Sf[0], 0.0);
-		pgrad(grad[grad[i].idf2].f2, grad[grad[i].idf2].idf2, i, df[0], Sf[0], 0.0);
-		pgrad(grad[grad[i].idf2].f3, grad[grad[i].idf2].idf3, i, df[0], Sf[0], 0.0);
-		pgrad(grad[grad[i].idf2].f4, grad[grad[i].idf2].idf4, i, df[0], Sf[0], 0.0);
-		//gradF-f3
-		pgrad(grad[grad[i].idf3].C, grad[i].idf3, i, df[0], Sf[0], 0.5);
-		pgrad(grad[grad[i].idf3].f1, grad[grad[i].idf3].idf1, i, df[0], Sf[0], 0.0);
-		pgrad(grad[grad[i].idf3].f2, grad[grad[i].idf3].idf2, i, df[0], Sf[0], 0.0);
-		pgrad(grad[grad[i].idf3].f3, grad[grad[i].idf3].idf3, i, df[0], Sf[0], 0.0);
-		pgrad(grad[grad[i].idf3].f4, grad[grad[i].idf3].idf4, i, df[0], Sf[0], 0.0);
-		//gradF-f4
-		pgrad(grad[grad[i].idf4].C, grad[i].idf4, i, df[0], Sf[0], 0.5);
-		pgrad(grad[grad[i].idf4].f1, grad[grad[i].idf4].idf1, i, df[0], Sf[0], 0.0);
-		pgrad(grad[grad[i].idf4].f2, grad[grad[i].idf4].idf2, i, df[0], Sf[0], 0.0);
-		pgrad(grad[grad[i].idf4].f3, grad[grad[i].idf4].idf3, i, df[0], Sf[0], 0.0);
-		pgrad(grad[grad[i].idf4].f4, grad[grad[i].idf4].idf4, i, df[0], Sf[0], 0.0);
+
+		if (grad[i].idf1 != -1) {
+			//gradF-f1
+			pgrad(grad[grad[i].idf1].C, grad[i].idf1, i, df[0], Sf[0], 0.5);
+			pgrad(grad[grad[i].idf1].f1, grad[grad[i].idf1].idf1, i, df[0], Sf[0], 0.0);
+			pgrad(grad[grad[i].idf1].f2, grad[grad[i].idf1].idf2, i, df[0], Sf[0], 0.0);
+			pgrad(grad[grad[i].idf1].f3, grad[grad[i].idf1].idf3, i, df[0], Sf[0], 0.0);
+			pgrad(grad[grad[i].idf1].f4, grad[grad[i].idf1].idf4, i, df[0], Sf[0], 0.0);
+		}
+
+		if (grad[i].idf2 != -1) {
+			//gradF-f2
+			pgrad(grad[grad[i].idf2].C, grad[i].idf2, i, df[0], Sf[0], 0.5);
+			pgrad(grad[grad[i].idf2].f1, grad[grad[i].idf2].idf1, i, df[0], Sf[0], 0.0);
+			pgrad(grad[grad[i].idf2].f2, grad[grad[i].idf2].idf2, i, df[0], Sf[0], 0.0);
+			pgrad(grad[grad[i].idf2].f3, grad[grad[i].idf2].idf3, i, df[0], Sf[0], 0.0);
+			pgrad(grad[grad[i].idf2].f4, grad[grad[i].idf2].idf4, i, df[0], Sf[0], 0.0);
+		}
+
+		if (grad[i].idf3 != -1) {
+			//gradF-f3
+			pgrad(grad[grad[i].idf3].C, grad[i].idf3, i, df[0], Sf[0], 0.5);
+			pgrad(grad[grad[i].idf3].f1, grad[grad[i].idf3].idf1, i, df[0], Sf[0], 0.0);
+			pgrad(grad[grad[i].idf3].f2, grad[grad[i].idf3].idf2, i, df[0], Sf[0], 0.0);
+			pgrad(grad[grad[i].idf3].f3, grad[grad[i].idf3].idf3, i, df[0], Sf[0], 0.0);
+			pgrad(grad[grad[i].idf3].f4, grad[grad[i].idf3].idf4, i, df[0], Sf[0], 0.0);
+		}
+
+		if (grad[i].idf4 != -1) {
+			//gradF-f4
+			pgrad(grad[grad[i].idf4].C, grad[i].idf4, i, df[0], Sf[0], 0.5);
+			pgrad(grad[grad[i].idf4].f1, grad[grad[i].idf4].idf1, i, df[0], Sf[0], 0.0);
+			pgrad(grad[grad[i].idf4].f2, grad[grad[i].idf4].idf2, i, df[0], Sf[0], 0.0);
+			pgrad(grad[grad[i].idf4].f3, grad[grad[i].idf4].idf3, i, df[0], Sf[0], 0.0);
+			pgrad(grad[grad[i].idf4].f4, grad[grad[i].idf4].idf4, i, df[0], Sf[0], 0.0);
+		}
+
 	}
 }
 void Fvm::findsharedface() {
-	int num = mesh_nodes.size();
+	uint64_t num = mesh_nodes.size();
 	for (int i = 0; i < mesh_eles.size(); i++) {
-		vector<int>temp;
+		vector<uint64_t>temp;
 		vector<int>data;
 		data.resize(2);
 		data[1] = -1;
@@ -120,7 +134,8 @@ void Fvm::findsharedface() {
 		temp.push_back(mesh_eles[i].numC);
 		temp.push_back(mesh_eles[i].numD);
 		sort(temp.begin(), temp.end());
-		int id[4];
+		uint64_t id[4];
+		uint64_t m = temp[3] * num * num;
 		id[0] = temp[0] + temp[1] * num + temp[2] * num * num;
 		id[1] = temp[0] + temp[1] * num + temp[3] * num * num;
 		id[2] = temp[0] + temp[2] * num + temp[3] * num * num;
@@ -136,19 +151,34 @@ void Fvm::findsharedface() {
 			}
 		}
 	}
+	for (int i = 0; i < mesh_bj.size(); i++) {
+		uint64_t id = faceid(mesh_bj[i][0], mesh_bj[i][1], mesh_bj[i][2]);
+		auto r = sharedface.find(id);
+		if (r == sharedface.end()) {
+			cout << "Error in " << __LINE__ << endl;
+		}
+		if (sharedface[id][1] != -1) {
+			cout << "Error in " << __LINE__ << endl;
+		}
+	}
 }
-inline int Fvm::faceid(int a, int b, int c) {
-	vector<int>temp;
+inline uint64_t Fvm::faceid(uint64_t a, uint64_t b, uint64_t c) {
+	vector<uint64_t>temp;
 	temp.push_back(a);
 	temp.push_back(b);
 	temp.push_back(c);
 	sort(temp.begin(), temp.end());
-	int id = temp[0] + temp[1] * mesh_eles.size() + temp[2] * mesh_eles.size() * mesh_eles.size();
+	uint64_t num = mesh_nodes.size();
+	uint64_t id = temp[0] + temp[1] * num + temp[2] * num * num;
 	return id;
 }
-void Fvm::cal() {
-	//计算单元面与哪个单元连接：
-	//1. 建立单元面哈希表
+void Fvm::init(string cwd) {
+
+	readRmsh(cwd);
+	//findneighbor();
+	findsharedface();
+	cal_gradient();
+
 	ap.clear();
 	anb.clear();
 	bp.clear();
@@ -156,21 +186,51 @@ void Fvm::cal() {
 	anb.resize(ap.size());
 	bp.resize(ap.size());
 	for (int i = 0; i < ap.size(); i++) {
+		ap[i] = 0.0;
+		bp[i] = 0.0;
 		anb[i].resize(ap.size());
+		for (int j = 0; j < ap.size(); j++) {
+			anb[i][j] = 0.0;
+		}
 	}
 
+	for (int i = 0; i < mesh_bj.size(); i++) {
+		uint64_t id = faceid(mesh_bj[i][0], mesh_bj[i][1], mesh_bj[i][2]);
+		fvm_bj.insert({ id, mesh_bj[i][3] });
+	}
+}
+void Fvm::cal_Diff(string cwd) {
+	//计算单元面与哪个单元连接：
+	//1. 建立单元面哈希表
+
+	init(cwd);
 	for (int i = 0; i < mesh_eles.size(); i++) {
 		vector<Point>Sf = mesh_eles[i].getelementsurfacenormal();
-		int id[4];
+		uint64_t id[4];
 		id[0] = faceid(mesh_eles[i].numA, mesh_eles[i].numB, mesh_eles[i].numC);
 		id[1] = faceid(mesh_eles[i].numA, mesh_eles[i].numB, mesh_eles[i].numD);
 		id[2] = faceid(mesh_eles[i].numA, mesh_eles[i].numC, mesh_eles[i].numD);
 		id[3] = faceid(mesh_eles[i].numB, mesh_eles[i].numC, mesh_eles[i].numD);
+		Point f[4];
+		f[0] = mesh_eles[i].getface_ABC();
+		f[1] = mesh_eles[i].getface_ABD();
+		f[2] = mesh_eles[i].getface_ACD();
+		f[3] = mesh_eles[i].getface_BCD();
 		//step1: 判断是内部面还是外部面
 		double gDiff[4] = { 0.0,0.0,0.0,0.0 };
 		for (int j = 0; j < 4; j++) {
 			if (sharedface[id[j]][1] == -1) {
-
+				//边界条件 id[j]
+				if (fvm_bj[id[j]] == 1 || fvm_bj[id[j]] == 3) {
+					Point ecb = f[j] - mesh_eles[i].getcent();
+					double dcb = norm(ecb);
+					ecb = 1.0 / dcb * ecb;
+					Point Eb = (Sf[j] * Sf[j]) / (ecb * Sf[j]) * ecb;
+					gDiff[j] = norm(Eb) / dcb;
+					Point Tb = Sf[j] - Eb;
+					if (fvm_bj[id[j]] == 1) bp[i] += gDiff[j] * 1.0;
+					else bp[i] += gDiff[j] * 0.0;
+				}
 			}
 			else {
 				int share;
@@ -185,11 +245,33 @@ void Fvm::cal() {
 				//gradfai_f * Tf
 				//gradfai_f = g * fai_c + (1 - g) * fai_F
 				Point Tf;
+				Point dCfi, dfiF;
 				Tf = Sf[j] - Ef;
-
+				dCfi = f[j] - mesh_eles[i].getcent();
+				dfiF = mesh_eles[share].getcent() - f[j];
+				float gfi = norm(dCfi) / (norm(dCfi) + norm(dfiF));
+				//grad_ffi = gfi * grad_fF + (1 - gfi) * grad_fC
+				Point grad_ffi;
+				for (int k = 0; k < Gradelements[share].size(); k++) {
+					anb[i][Gradelements[share][k].id] += gfi * Gradelements[share][k].data * Tf;
+				}
+				for (int k = 0; k < Gradelements[i].size(); k++) {
+					anb[i][Gradelements[i][k].id] += (1.0 - gfi) * Gradelements[i][k].data * Tf;
+				}
 			}
 		}
 		ap[i] += gDiff[0] + gDiff[1] + gDiff[2] + gDiff[3];
-
 	}
+
+	//AX = b
+	for (int i = 0; i < ap.size(); i++) {
+		for (int j = 0; j < ap.size(); j++) {
+			if (i == j) {
+				anb[i][j] += ap[i];
+			}
+		}
+	}
+	auto res = solver_equtionGaussSeidel(anb, bp);
+
+	WritingRes(res);
 }

@@ -158,16 +158,16 @@ double& Element_cvfem::getS_bcd() {
 	return this->S_bcd;
 }
 Point Element_cvfem::getface_ABC() {
-	return 1.0 / 3.0 * (numA + numB + numC);
+	return 1.0 / 3.0 * (getA() + getB() + getC());
 }
 Point Element_cvfem::getface_ABD() {
-	return 1.0 / 3.0 * (numA + numB + numD);
+	return 1.0 / 3.0 * (getA() + getB() + getD());
 }
 Point Element_cvfem::getface_ACD() {
-	return 1.0 / 3.0 * (numA + numC + numD);
+	return 1.0 / 3.0 * (getA() + getC() + getD());
 }
 Point Element_cvfem::getface_BCD() {
-	return 1.0 / 3.0 * (numB + numC + numD);
+	return 1.0 / 3.0 * (getB() + getC() + getD());
 }
 Point Element_cvfem::getcent() {
 	Point temp;
@@ -579,12 +579,14 @@ vector<double> Mesh_cvfem::solver_equtionGaussSeidel(vector<vector<double>>& A, 
 		cout << "必须方阵" << endl;
 		return x;
 	}
+#if(0)
 	for (int i = 0; i < A.size(); i++) {
 		if (A[i][i] < Min) {
 			cout << "对角必须大于0" << endl;
 			return x;
 		}
 	}
+#endif
 	x.resize(b.size());
 	x_old.resize(b.size());
 	for (int i = 0; i < x.size(); i++) {
